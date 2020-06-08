@@ -48,8 +48,8 @@ class Train:
 
                 # 用正样本和负样本训练置信度
                 c_mask = tags[:, 0] < 2
-                c_pre = predict[c_mask]
-                c_tag = tags[c_mask]
+                c_pre = predict[c_mask]  # 取出正样本和负样本的预测值
+                c_tag = tags[c_mask]  # 取出正样本和负样本的置信度标签值
                 loss_c = torch.mean((c_tag[:, 0] - c_pre[:, 0]) ** 2)  # 置信度在第一个维度，做mse
 
                 # 用部分样本和负样本训练坐标
@@ -80,7 +80,7 @@ class Train:
 
 if __name__ == '__main__':
     train = Train("D:/mtcnn_data", 24)
-    train(1000) #训练轮次
+    train(1000)  # 训练轮次
 
 
 

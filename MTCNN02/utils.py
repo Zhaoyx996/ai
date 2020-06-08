@@ -21,6 +21,24 @@ def iou(box, boxes, is_min=False):
     else:
         return inter/(boxes_area + box_area - inter)
 
+
+def nms(boxes, threshold, is_min=False):  # 传入框，阈值
+    if boxes.shape[0] == 0:return np.array([])  # 如果不存在框，返回框
+    _boxes = boxes[(-boxes[:, 4]).argsort()]  # 把框之间的iou从大到小排序
+
+    r_boxes = []
+
+    while _boxes.shape[0] > 1:  # 当所有的框多于一个时
+        a_box = _boxes[0]  # 取出第一个框
+        b_boxes = _boxes[1:]  # 取出剩余的框
+        r_boxes.append(a_box)  # 把第一个框加进去
+        _boxes = b_boxes[iou(a_box, b_boxes, is_min) < threshold]
+
+    if _boxes.shape[0] > 0:  # 如果剩下一个，保留
+        r_boxes.append(_boxes[0])  # 保留剩余的框
+
+    return np.array(r_boxes)  # 返回留下来的框
+
 if __name__ == '__main__':
     box = np.array([1, 1, 3, 3])
     boxes = np.array([[1, 1, 3, 3], [3, 3, 5, 5], [2, 2, 4, 4]])
