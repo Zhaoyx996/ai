@@ -10,26 +10,24 @@ class Detector:
         self.pnet.load_state_dict(torch.load('pnet.pt'))  # 加载权重
         self.pnet.eval()
 
-        self.pnet = PNet()
-        self.pnet.load_state_dict(torch.load('pnet.pt'))
+        self.rnet = RNet()
+        self.rnet.load_state_dict(torch.load('rnet.pt'))
         self.pnet.eval()
 
-        self.pnet = PNet()
-        self.pnet.load_state_dict(torch.load('pnet.pt'))
-        self.pnet.eval()
+        self.onet = ONet()
+        self.onet.load_state_dict(torch.load('onet.pt'))
+        self.onet.eval()
 
     def __call__(self, img):
         boxes = self.detPnet(img)  # 放入图片，返回一组框
         if boxes is None: return []  # 如果不存在人脸，返回一个框
-        # return boxes
-
 
         boxes = self.detRnet(img, boxes)
         if boxes is None: return []
+        # return boxes
 
         boxes = self.detOnet(img, boxes)
         if boxes is None: return []
-
         return boxes
 
     def detPnet(self, img):
@@ -47,7 +45,7 @@ class Detector:
 
             torch.sigmoid_(y[:, 0, ...])
             c = y[0, 0]  # 置信度去掉前面通道
-            c_mask = c > 0.6  # 得到置信度大于该值的框
+            c_mask = c > 0.55  # 得到置信度大于该值的框
             idxs = c_mask.nonzero()  # 人脸索引
             _x1, _y1 = idxs[:, 1] * 2, idxs[:, 0] * 2  # 2为组合卷积的步长，求出坐标
             _x2, _y2 = _x1 + 12, _y1 + 12
@@ -77,12 +75,12 @@ class Detector:
 
     def detRnet(self, img, boxes):
         _boxes = self._rnet_onet(img, boxes, 24)
-        return nms(_boxes, 0.9)
+        return nms(_boxes, 0.85)
 
     def detOnet(self, img, boxes):
         _boxes = self._rnet_onet(img, boxes, 48)
         _boxes = nms(_boxes, 0.9)
-        _boxes = nms(_boxes, 0.8, is_min=True)  # 去除重叠的框
+        _boxes = nms(_boxes, 0.1, is_min=True)  # 去除重叠的框
         return _boxes
 
     def _rnet_onet(self, img, boxes, s):
@@ -101,7 +99,7 @@ class Detector:
         torch.sigmoid_(y[:, 0])
         y = y.numpy()
 
-        c_mask = y[:, 0] > 0.8
+        c_mask = y[:, 0] > 0.9
         _boxes = boxes[c_mask]
         _y = y[c_mask]
         # print(_y)

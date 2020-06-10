@@ -66,20 +66,20 @@ class Train:
                 self.opt.step()
 
                 print(loss)
-            print(epoch)
+                print(epoch)
 
-            # 保存权重
-            if self.img_size == 12:
-                torch.save(self.net.state_dict(), 'pnet.pt')
+                # 保存权重
+                if self.img_size == 12:
+                    torch.save(self.net.state_dict(), 'pnet.pt')
 
-            if self.img_size == 24:
-                torch.save(self.net.state_dict(), 'rnet.pt')
+                elif self.img_size == 24:
+                    torch.save(self.net.state_dict(), 'rnet.pt')
 
-            if self.img_size == 48:
-                torch.save(self.net.state_dict(), 'onet.pt')
+                else:
+                    torch.save(self.net.state_dict(), 'onet.pt')
 
 if __name__ == '__main__':
-    train = Train("D:/mtcnn_data", 24)
+    train = Train("D:/mtcnn_data", 48)
     train(1000)  # 训练轮次
 
 
